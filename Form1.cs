@@ -50,6 +50,9 @@ namespace SimplePaint
             trbLineWidth.Value = 2;
             trbLineWidth.ValueChanged += trbLineWidth_ValueChanged;
 
+            btnSaveFile.Click += btnSaveFile_Click;
+            btnOpenFile.Click += btnOpenFile_Click;
+
         }
 
         private void TrbLineWidth_ValueChanged(object? sender, EventArgs e)
@@ -203,7 +206,38 @@ namespace SimplePaint
 
         private void btnOpenFile_Click(object sender, EventArgs e)
         {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "Image Files|*.png;*.jpg;*.jpeg;*.bmp";
+                openFileDialog.Title = "이미지 불러오기";
 
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // 1. 선택한 이미지 파일을 불러옴
+                    Image loadedImage = Image.FromFile(openFileDialog.FileName);
+
+                    // 2. 기존 캔버스 크기를 불러온 이미지 크기로 맞추거나, 
+                    // 현재 캔버스 크기에 맞춰서 새 비트맵을 생성합니다.
+                    Bitmap newBitmap = new Bitmap(picCanvas.Width, picCanvas.Height);
+                    using (Graphics g = Graphics.FromImage(newBitmap))
+                    {
+                        g.Clear(Color.White);
+                        // 이미지를 캔버스 크기에 맞춰 그림
+                        g.DrawImage(loadedImage, 0, 0, picCanvas.Width, picCanvas.Height);
+                    }
+
+                    // 3. 기존 자원 해제 및 교체
+                    canvasBitmap.Dispose();
+                    canvasGraphics.Dispose();
+
+                    canvasBitmap = newBitmap;
+                    canvasGraphics = Graphics.FromImage(canvasBitmap);
+                    picCanvas.Image = canvasBitmap;
+
+                    loadedImage.Dispose(); // 불러온 원본 이미지 자원 해제
+                    picCanvas.Invalidate();
+                }
+            }
         }
 
         private void picCanvas_MouseDown(object sender, MouseEventArgs e)
@@ -215,5 +249,45 @@ namespace SimplePaint
         {
             currentLineWidth = trbLineWidth.Value;
         }
+        private void btnSaveFile_Click(object sender, EventArgs e)
+        {
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                // 파일 형식 선택창을 없애고, 파일 이름만 입력받도록 설정
+                saveFileDialog.Title = "이미지 3종 세트(PNG, JPG, BMP)로 저장하기";
+                saveFileDialog.FileName = "MyDrawing"; // 기본 파일명
+                saveFileDialog.Filter = "All Files|*.*"; // 모든 파일로 표시
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        // 사용자가 입력한 경로에서 확장자를 뺀 순수 파일 경로와 이름을 가져옵니다.
+                        // 예: C:\Photos\Test.png -> C:\Photos\Test
+                        string filePathWithoutExt = System.IO.Path.ChangeExtension(saveFileDialog.FileName, null);
+
+                        // 1. PNG 저장
+                        canvasBitmap.Save(filePathWithoutExt + ".png", ImageFormat.Png);
+
+                        // 2. JPG 저장
+                        canvasBitmap.Save(filePathWithoutExt + ".jpg", ImageFormat.Jpeg);
+
+                        // 3. BMP 저장
+                        canvasBitmap.Save(filePathWithoutExt + ".bmp", ImageFormat.Bmp);
+
+                        
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("저장 중 오류가 발생했습니다: " + ex.Message);
+                    }
+                }
+            }
+        }
+
+
     }
-}
+    }
+
+   
+
