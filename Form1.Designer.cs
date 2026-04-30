@@ -40,11 +40,13 @@
             btnOpenFile = new Button();
             btnSaveFile = new Button();
             picCanvas = new PictureBox();
+            pnlScroll = new Panel();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)trbLineWidth).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picCanvas).BeginInit();
+            pnlScroll.SuspendLayout();
             SuspendLayout();
             // 
             // lblAppName
@@ -198,23 +200,34 @@
             picCanvas.Margin = new Padding(2);
             picCanvas.Name = "picCanvas";
             picCanvas.Size = new Size(786, 350);
+            picCanvas.SizeMode = PictureBoxSizeMode.AutoSize;
             picCanvas.TabIndex = 7;
             picCanvas.TabStop = false;
             picCanvas.Click += picCanvas_Click;
             picCanvas.MouseDown += picCanvas_MouseDown;
+            // 
+            // pnlScroll
+            // 
+            pnlScroll.AutoScroll = true;
+            pnlScroll.Controls.Add(picCanvas);
+            pnlScroll.Dock = DockStyle.Fill;
+            pnlScroll.Location = new Point(0, 0);
+            pnlScroll.Name = "pnlScroll";
+            pnlScroll.Size = new Size(828, 555);
+            pnlScroll.TabIndex = 8;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(828, 555);
-            Controls.Add(picCanvas);
             Controls.Add(btnSaveFile);
             Controls.Add(btnOpenFile);
             Controls.Add(groupBox3);
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
             Controls.Add(lblAppName);
+            Controls.Add(pnlScroll);
             Margin = new Padding(2);
             Name = "Form1";
             Text = "Sinple Paint v1.0";
@@ -225,6 +238,8 @@
             groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)trbLineWidth).EndInit();
             ((System.ComponentModel.ISupportInitialize)picCanvas).EndInit();
+            pnlScroll.ResumeLayout(false);
+            pnlScroll.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -243,5 +258,6 @@
         private TrackBar trbLineWidth;
         private Button btnCircle;
         private Button btnRectangle;
+        private Panel pnlScroll;
     }
 }

@@ -19,6 +19,7 @@ namespace SimplePaint
         private Color currentColor = Color.Black;      // 현재 색상
         private int currentLineWidth = 2;              // 현재선두께
         ToolType currentToolType = ToolType.Line;
+        private double zoomFactor = 1.0; // 확대/축소 비율 (1.0 = 100%)
 
         public Form1()
         {
@@ -209,35 +210,59 @@ namespace SimplePaint
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.Filter = "Image Files|*.png;*.jpg;*.jpeg;*.bmp";
-                openFileDialog.Title = "이미지 불러오기";
-
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    // 1. 선택한 이미지 파일을 불러옴
-                    Image loadedImage = Image.FromFile(openFileDialog.FileName);
+                    // 1. 기존 리소스 안전하게 해제
+                    picCanvas.Image = null; // PictureBox 연결 끊기
+                    if (canvasGraphics != null) canvasGraphics.Dispose();
+                    if (canvasBitmap != null) canvasBitmap.Dispose();
 
-                    // 2. 기존 캔버스 크기를 불러온 이미지 크기로 맞추거나, 
-                    // 현재 캔버스 크기에 맞춰서 새 비트맵을 생성합니다.
-                    Bitmap newBitmap = new Bitmap(picCanvas.Width, picCanvas.Height);
-                    using (Graphics g = Graphics.FromImage(newBitmap))
+                    // 2. 파일로부터 이미지 로드 (파일 잠금 방지를 위해 복사본 사용 추천)
+                    using (Image tempImg = Image.FromFile(openFileDialog.FileName))
                     {
-                        g.Clear(Color.White);
-                        // 이미지를 캔버스 크기에 맞춰 그림
-                        g.DrawImage(loadedImage, 0, 0, picCanvas.Width, picCanvas.Height);
+                        // 원본 크기의 새 비트맵 생성
+                        canvasBitmap = new Bitmap(tempImg.Width, tempImg.Height);
+                        canvasGraphics = Graphics.FromImage(canvasBitmap);
+
+                        // 캔버스에 그리기
+                        canvasGraphics.DrawImage(tempImg, 0, 0);
                     }
 
-                    // 3. 기존 자원 해제 및 교체
-                    canvasBitmap.Dispose();
-                    canvasGraphics.Dispose();
+                    // 3. 배율 초기화 및 캔버스 크기 업데이트
+                    zoomFactor = 1.0;
 
-                    canvasBitmap = newBitmap;
-                    canvasGraphics = Graphics.FromImage(canvasBitmap);
-                    picCanvas.Image = canvasBitmap;
-
-                    loadedImage.Dispose(); // 불러온 원본 이미지 자원 해제
-                    picCanvas.Invalidate();
+                    // 크기 변경 메서드 호출 전 비트맵이 확실히 있는지 체크
+                    if (canvasBitmap != null)
+                    {
+                        UpdateCanvasSize(); // 여기서 picCanvas.Width/Height가 변경됨
+                        picCanvas.Image = canvasBitmap;
+                    }
                 }
             }
+        }
+
+        private void UpdateCanvasSize()
+        {
+            if (canvasBitmap == null) return;
+
+            // 1. 계산된 크기를 변수에 먼저 담습니다.
+            int newWidth = (int)(canvasBitmap.Width * zoomFactor);
+            int newHeight = (int)(canvasBitmap.Height * zoomFactor);
+
+            // 2. 컨트롤의 크기가 최소 1 이상이 되도록 보장합니다. (0이 되면 오류 발생 가능)
+            if (newWidth < 1) newWidth = 1;
+            if (newHeight < 1) newHeight = 1;
+
+            // 3. GDI+ 컨트롤의 최대 크기 제한 (보통 32,767픽셀)을 넘지 않도록 제한합니다.
+            const int MaxSize = 30000;
+            if (newWidth > MaxSize) newWidth = MaxSize;
+            if (newHeight > MaxSize) newHeight = MaxSize;
+
+            // 4. 안전하게 적용
+            picCanvas.Width = newWidth;
+            picCanvas.Height = newHeight;
+
+            picCanvas.SizeMode = PictureBoxSizeMode.Zoom;
         }
 
         private void picCanvas_MouseDown(object sender, MouseEventArgs e)
@@ -282,6 +307,24 @@ namespace SimplePaint
                         MessageBox.Show("저장 중 오류가 발생했습니다: " + ex.Message);
                     }
                 }
+            }
+        }
+       
+
+        // 확대 버튼 예시
+        private void btnZoomIn_Click(object sender, EventArgs e)
+        {
+            zoomFactor += 0.1; // 10%씩 확대
+            UpdateCanvasSize();
+        }
+
+        // 축소 버튼 예시
+        private void btnZoomOut_Click(object sender, EventArgs e)
+        {
+            if (zoomFactor > 0.2) // 최소 크기 제한
+            {
+                zoomFactor -= 0.1;
+                UpdateCanvasSize();
             }
         }
 
