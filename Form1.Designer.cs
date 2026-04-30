@@ -65,7 +65,7 @@
             groupBox1.Controls.Add(btnCircle);
             groupBox1.Controls.Add(btnRectangle);
             groupBox1.Controls.Add(btnLine);
-            groupBox1.Location = new Point(30, 81);
+            groupBox1.Location = new Point(31, 81);
             groupBox1.Margin = new Padding(2);
             groupBox1.Name = "groupBox1";
             groupBox1.Padding = new Padding(2);
@@ -146,7 +146,7 @@
             // groupBox3
             // 
             groupBox3.Controls.Add(trbLineWidth);
-            groupBox3.Location = new Point(462, 84);
+            groupBox3.Location = new Point(458, 84);
             groupBox3.Margin = new Padding(2);
             groupBox3.Name = "groupBox3";
             groupBox3.Padding = new Padding(2);
@@ -168,7 +168,7 @@
             // 
             btnOpenFile.BackColor = SystemColors.Desktop;
             btnOpenFile.Font = new Font("한컴 말랑말랑 Regular", 17.9999981F, FontStyle.Regular, GraphicsUnit.Point, 129);
-            btnOpenFile.Location = new Point(638, 103);
+            btnOpenFile.Location = new Point(634, 103);
             btnOpenFile.Margin = new Padding(2);
             btnOpenFile.Name = "btnOpenFile";
             btnOpenFile.Size = new Size(82, 75);
@@ -182,7 +182,7 @@
             // 
             btnSaveFile.BackColor = Color.LightGoldenrodYellow;
             btnSaveFile.Font = new Font("한컴 말랑말랑 Regular", 16.1999989F, FontStyle.Regular, GraphicsUnit.Point, 129);
-            btnSaveFile.Location = new Point(724, 103);
+            btnSaveFile.Location = new Point(720, 103);
             btnSaveFile.Margin = new Padding(2);
             btnSaveFile.Name = "btnSaveFile";
             btnSaveFile.Size = new Size(83, 75);
@@ -201,6 +201,7 @@
             picCanvas.TabIndex = 7;
             picCanvas.TabStop = false;
             picCanvas.Click += picCanvas_Click;
+            picCanvas.MouseDown += picCanvas_MouseDown;
             // 
             // Form1
             // 
